@@ -1,0 +1,4 @@
+module jq {
+    umbrella header "jq_umbrella.h"
+    link "jq"
+}
