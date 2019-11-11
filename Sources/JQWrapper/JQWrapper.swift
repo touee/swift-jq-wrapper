@@ -1,9 +1,11 @@
 import Cjq
+import Dispatch
 
 final public class JQ {
     private var state: OpaquePointer!
+    private var lock: DispatchSemaphore?
     
-    public init(query: String) throws {
+    public init(query: String, usesLock: Bool = false) throws {
         guard let state = jq_init() else {
             throw JQError.system
         }
@@ -15,6 +17,9 @@ final public class JQ {
         if !hasCompiled {
             throw JQError.compile
         }
+        if usesLock {
+            self.lock = DispatchSemaphore(value: 1)
+        }
     }
     
     public func executeOne(input: String) throws -> String {
@@ -25,6 +30,10 @@ final public class JQ {
 //        defer { jv_free(inputStringJV) }
         if jv_is_valid(inputStringJV) == 0 {
             throw JQWrapperError.parse(message: getInvalidMessage(of: inputStringJV))
+        }
+        
+        if let lock = self.lock {
+            lock.wait()
         }
         
         jq_start(self.state, inputStringJV, 0)
@@ -51,6 +60,10 @@ final public class JQ {
                 }
                 throw JQWrapperError.execute(message: getInvalidMessage(of: temp))
             }
+        }
+        
+        if let lock = self.lock {
+            lock.signal()
         }
         
         return String(cString: resultChars)
