@@ -1,4 +1,4 @@
-import jq
+import Cjq
 
 final public class JQ {
     private var state: OpaquePointer!

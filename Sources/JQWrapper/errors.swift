@@ -1,5 +1,3 @@
-import jq
-
 public enum JQError: Error {
     case system
     case compile

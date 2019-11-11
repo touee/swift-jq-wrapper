@@ -19,12 +19,12 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .systemLibrary(
-            name: "jq", 
+            name: "Cjq", 
             pkgConfig: "libjq", 
             providers: [.apt(["libjq-dev"]), .brew(["jq"])]),
         .target(
             name: "JQWrapper",
-            dependencies: ["jq"]),
+            dependencies: ["Cjq"]),
         .testTarget(
             name: "JQWrapperTests",
             dependencies: ["JQWrapper"]),

@@ -22,7 +22,18 @@ final class JQWrapperTests: XCTestCase {
         }
     }
 
+    func testOneMultiInstances() {
+        for i in 0..<100 {
+        let jq = try! JQ(query: #"[.[].a]"#)
+            let rand = String((0..<10000000).randomElement()!)
+            print(i, rand)
+            XCTAssertEqual(String(format: #"[1,2,"%@"]"#, rand) , try! jq.executeOne(input: String(format: json1, rand)))
+        }
+    }
+
     static var allTests = [
         ("testOne", testOne),
+        ("testOneReuse", testOneReuse),
+        ("testOneMultiInstances", testOneMultiInstances),
     ]
 }
