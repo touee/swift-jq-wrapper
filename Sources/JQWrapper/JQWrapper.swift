@@ -2,10 +2,17 @@ import Cjq
 import Dispatch
 
 final public class JQ {
+    public enum Option {
+        case sortKeys
+    }
+    let options: [Option]
+    
     private var state: OpaquePointer!
     private var lock: DispatchSemaphore?
     
-    public init(query: String, usesLock: Bool = false) throws {
+    public init(query: String, usesLock: Bool = false, options: [Option] = []) throws {
+        self.options = options
+        
         guard let state = jq_init() else {
             throw JQError.system
         }
@@ -20,6 +27,14 @@ final public class JQ {
         if usesLock {
             self.lock = DispatchSemaphore(value: 1)
         }
+    }
+    
+    private var dumpFlags: Int32 {
+        var flags: Int32 = 0
+        if options.contains(.sortKeys) {
+            flags |= Int32(JV_PRINT_SORTED.rawValue)
+        }
+        return flags
     }
     
     public func executeOne(input: String) throws -> String {
@@ -44,7 +59,7 @@ final public class JQ {
             throw JQWrapperError.execute(message: getInvalidMessage(of: result))
         }
         
-        let resultStringJV = jv_dump_string(result, 0)
+        let resultStringJV = jv_dump_string(result, self.dumpFlags)
         defer { jv_free(resultStringJV) }
         if jv_is_valid(resultStringJV) == 0 {
             throw JQWrapperError.unknown(message: getInvalidMessage(of: resultStringJV))

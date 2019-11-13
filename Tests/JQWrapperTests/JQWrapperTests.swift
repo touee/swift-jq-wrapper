@@ -30,6 +30,13 @@ final class JQWrapperTests: XCTestCase {
             XCTAssertEqual(String(format: #"[1,2,"%@"]"#, rand) , try! jq.executeOne(input: String(format: json1, rand)))
         }
     }
+    
+    func testSortKeys() {
+        let jq1 = try! JQ(query: ".", options: [.sortKeys])
+        XCTAssertEqual(#"{"a":1,"b":2,"c":3}"#, try! jq1.executeOne(input: #"{ "b": 2, "c": 3, "a": 1 }"#))
+        let jq2 = try! JQ(query: ".")
+        XCTAssertEqual(#"{"b":2,"c":3,"a":1}"#, try! jq2.executeOne(input: #"{ "b": 2, "c": 3, "a": 1 }"#))
+    }
 
     static var allTests = [
         ("testOne", testOne),
